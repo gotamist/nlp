@@ -99,16 +99,19 @@ def deep_rnn_model(input_dim, units, recur_layers, output_dim=29):
     input_data = Input(name='the_input', shape=(None, input_dim))
     # TODO: Add recurrent layers, each with batch normalization
     
+#        simp_rnn = GRU(units, activation=activation,
+#        return_sequences=True, implementation=2, name='rnn')(input_data)
+    # TODO: Add batch normalization 
+#    bn_rnn = BatchNormalization()(simp_rnn)
 #    cells = [ GRU(output_dim) for _ in recur_layers ]
 #    rnn_layer = RNN(cells)(input_data)
-#    recur = input_data
-#    for _ in range(recur_layers):
-#        recur = GRU( output_dim )(recur)
-#        recur = BatchNormalization()(recur)
-    
+    recur = input_data
+    for cellnum in range(recur_layers):
+        recur = GRU( units, activation='relu', return_sequences=True, implementation=2, name='rnn_'+str(cellnum))(recur)
+        recur = BatchNormalization()(recur)
     
     # TODO: Add a TimeDistributed(Dense(output_dim)) layer
-#    time_dense = TimeDistributed(Dense(output_dim))(recur)
+    time_dense = TimeDistributed(Dense(output_dim))(recur)
     # Add softmax activation layer
     y_pred = Activation('softmax', name='softmax')(time_dense)
     # Specify the model
