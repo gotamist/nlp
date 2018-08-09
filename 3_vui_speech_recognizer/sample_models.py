@@ -192,26 +192,26 @@ def final_model(input_dim, filters, kernel_size, conv_stride, conv_border_mode, 
                      activation='relu',
                      name='conv1d_1')(input_data)
     conv1 = BatchNormalization()(conv1)
-#    conv1 = Dropout(conv_dropout)(conv1)
+    conv1 = Dropout(conv_dropout)(conv1)
 #    conv1 = MaxPooling1D(pool_size=pool_size,strides=1)(conv1) #default padding is 'valid' (strides any less would make the sequence length<222)
     
     
     # Add a second convolutional layer with BN and Dropout
     
-#    conv2 = Conv1D(filters, kernel_size, 
-#                     strides=conv_stride, 
-#                     padding=conv_border_mode,
-#                     activation='relu',
-#                     name='conv1d_2')(conv1)
-#    conv2 = BatchNormalization()(conv2)
-#    conv2 = Dropout(conv_dropout)(conv2)
+    conv2 = Conv1D(filters, kernel_size, 
+                     strides=conv_stride, 
+                     padding=conv_border_mode,
+                     activation='relu',
+                     name='conv1d_2')(conv1)
+    conv2 = BatchNormalization()(conv2)
+    conv2 = Dropout(conv_dropout)(conv2)
 #    conv2 = MaxPooling1D(pool_size=pool_size)(conv2)
     
     # Add multilayer RNN with dropout
     
     recur = conv1
     for cellnum in range(recur_layers):
-        recur = Bidirectional( GRU( units, activation='relu', return_sequences=True, dropout = 0.0, recurrent_dropout = 0.0) )(recur) #dropout was droput_U and recurrent_dropout was dropout_W
+        recur = Bidirectional( GRU( units, activation='tanh', return_sequences=True, dropout = 0.5, recurrent_dropout = 0.5) )(recur) #dropout was droput_U and recurrent_dropout was dropout_W
         recur = BatchNormalization()(recur)
         
 #    recur = MaxPooling1D( pool_size=pool_size )( recur ) #default padding is 'valid' (strides any less would make the sequence length<222)
