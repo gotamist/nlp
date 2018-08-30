@@ -240,44 +240,45 @@ def opt_model(input_dim, filters, kernel_size, conv_stride, conv_border_mode, un
     return model
 
 
-def final_model(input_dim, filters, kernel_size, conv_stride, conv_border_mode, units, recur_layers=2, output_dim=29): 
+def final_model(input_dim, filters, kernel_size, conv_stride, conv_border_mode, units, num_cnn=1, recur_layers=2, output_dim=29, drop_fraction = 0.2): 
 #    two convolutional layers
     """ Build a deep network for speech 
     """
-    
-#    pool_strides =1
+    assert num_cnn<3, "Only supports one or two CNN layers"
+
     dilation_rate = 1
     # Main acoustic input
     input_data = Input(name='the_input', shape=(None, input_dim))
     # TODO: Specify the layers in your network
 
     # Add convolutional layer with BN and Dropout
-    drop_fraction = 0.2
-    conv1 = Conv1D(filters, kernel_size, 
+    
+    conv = Conv1D(filters, kernel_size, 
                      strides=conv_stride, 
                      padding=conv_border_mode,
                      activation='relu',
                      dilation_rate=dilation_rate,
                      name='conv1d_1')(input_data)
-    conv1 = BatchNormalization()(conv1)
-    conv1 = Dropout(drop_fraction)(conv1)
-    #In the maxpoling layer below, I have used kernel_size from the conv layer as the pooling size.
-#    conv1 = MaxPooling1D(pool_size=kernel_size,strides=pool_strides, padding='same')(conv1) #default padding is 'valid' (strides any less would make the sequence length<222)
-#    Add a second convolutional layer with BN and Dropout
+    conv = BatchNormalization()(conv)
+    conv = Dropout(drop_fraction)(conv)
     
-    conv2 = Conv1D(2*filters, kernel_size, 
-                     strides=conv_stride, 
-                     padding=conv_border_mode,
-                     activation='relu',
-                     dilation_rate=dilation_rate,
-                     name='conv1d_2')(conv1)
-    conv2 = BatchNormalization()(conv2)
-    conv2 = Dropout(drop_fraction)(conv2)
+    #more convolutional layers as needed
+    
+    if num_cnn==2:
+        conv = Conv1D( 2*filters, kernel_size, 
+                strides=conv_stride, 
+                padding=conv_border_mode,
+                activation='relu',
+                dilation_rate=dilation_rate,
+                name='conv1d_2')(conv)
+        conv = BatchNormalization()(conv)
+        conv = Dropout(drop_fraction)(conv)
+        
     
 #   conv2 = MaxPooling1D(pool_size=kernel_size,strides=pool_strides, padding='same')(conv2) #default padding is 'valid' (strides any less would make the sequence length<222)
     # Add multilayer RNN with dropout
     
-    recur = conv2
+    recur = conv 
     for cellnum in range(recur_layers):
         recur = Bidirectional( GRU( units, activation='relu', return_sequences=True, dropout = drop_fraction, recurrent_dropout = drop_fraction) )(recur) #dropout was droput_U and recurrent_dropout was dropout_W
         recur = BatchNormalization()(recur)
@@ -292,12 +293,14 @@ def final_model(input_dim, filters, kernel_size, conv_stride, conv_border_mode, 
     # Specify the model
     model = Model(inputs=input_data, outputs=y_pred)
     # Specify model.output_length
-#    model.output_length = lambda x: cnn_output_length(
-#        x, kernel_size, conv_border_mode, conv_stride)
-#    model.output_length = lambda x: cnn_pooling_output_length(
-#        x, kernel_size, conv_border_mode, conv_stride, pool_size=pool_size, num_cnn=2, num_pool=1)
-
-    model.output_length = lambda x: cnn_output_length( cnn_output_length(
-        x, kernel_size, conv_border_mode, conv_stride, dilation=dilation_rate), kernel_size, conv_border_mode, conv_stride, dilation=dilation_rate )
-    print(model.summary())
+    
+    if num_cnn==1:
+        model.output_length = lambda x: cnn_output_length(
+            x, kernel_size, conv_border_mode, conv_stride)          
+    if num_cnn==2:  
+        model.output_length = lambda x: cnn_output_length( cnn_output_length(
+            x, kernel_size, conv_border_mode, conv_stride, dilation=dilation_rate), kernel_size, conv_border_mode, conv_stride, dilation=dilation_rate )
+    
     return model
+
+
