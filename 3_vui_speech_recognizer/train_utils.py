@@ -34,10 +34,10 @@ def train_model(input_to_softmax,
                 save_model_path,
                 train_json='train_corpus.json',
                 valid_json='valid_corpus.json',
-                minibatch_size=20,
+                minibatch_size=128, #256 worked for most models
                 spectrogram=True,
                 mfcc_dim=13,
-                optimizer=SGD(lr=0.03, decay=1e-6, momentum=0.9, nesterov=True, clipnorm=1), #I changed lr to 0.05 and set clipnorm to 1 to prevent NaN loss
+                optimizer=SGD(lr=0.1, decay=1e-6, momentum=0.9, nesterov=True, clipnorm=1 ), #I changed lr to 0.05 and set clipnorm to 1 to prevent NaN loss
                 epochs=20,
                 verbose=1,
                 sort_by_duration=False,
