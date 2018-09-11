@@ -3,10 +3,11 @@ from __future__ import absolute_import, division, print_function
 # python make_desc_json.py path_of_wav_file_dir json_to_be_created.json
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Thu Sep  6 09:43:08 2018
+"""Created on Thu Sep  6 09:43:08 2018
 
-@author: This file is from Onur Ucler (https://github.com/oucler/NLND-End2End-Speech-Recognition/blob/master/create_desc_json.py)
+@author: This file is from Baidu research
+https://github.com/baidu-research/ba-dls-deepspeech
+
 """
 
 """
