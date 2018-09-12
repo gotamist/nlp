@@ -10,6 +10,7 @@ from data_generator import AudioGenerator
 import re
 from itertools import chain
 from textblob import TextBlob as tb
+import kenlm
 
 
 #import nltk
@@ -83,11 +84,107 @@ def get_neighborhood(string, wordset, distance):
     nbd = [word for word in wordset if levenshtein(string, word) <= distance ]
     return nbd
     
-#nbd = get_neighborhood('helium', train_words, 2) #tested
-nbd = get_neighborhood('helium', english, 2) #tested
+#nbd = get_neighborhood('helium', train_words, 2) #tested, 5 words found
+#nbd = get_neighborhood('helium', english, 2) #tested, 43 words found
+sample_true = 'far up the lake eighteen miles above the town the eye of this cheerful camp follower of booms had spied out a graft'
 sample_input_sent = 'far ut the lake eightteen mils abo the town to ey of dis cherple can flolowor o bons had xpide ut a graft'
-inp = input_sent.split()
+sample_blob='far ut the lake eighteen miss ago the town to by of dis chere can follower o bons had side ut a graft'
+#inp = input_sent.split()
 
+kenmodel = kenlm.Model('corpus_360_lines.arpa')
+ken5model = kenlm.Model('5_gram_corpus_360.arpa')
+
+
+def lm_predict(input_sentence, dictionary): #input is a string
+    #assumes that the output of the DNN is of the right length
+    """this function keeps adding words that maximize the probability of sentence
+    all the way from the beginning until the new word"""
+    inp = input_sentence.split()
+       
+    #construct the first trigram
+    #Note that the shortest sentence in this dataset has three words
+    #for the second word, use bigram prob from kenlm
+#    nbd0 = [ inp[0] ] if inp[0] in dictionary else get_neighborhood( inp[0], dictionary, 2)
+#    nbd1 = [ inp[1] ] if inp[1] in dictionary else get_neighborhood( inp[1], dictionary, 2)
+#    nbd2 = [ inp[2] ] if inp[2] in dictionary else get_neighborhood( inp[2], dictionary, 2)
+    
+    nbd0 = get_neighborhood( inp[0], dictionary, 2)
+    nbd1 = get_neighborhood( inp[1], dictionary, 2)
+    nbd2 = get_neighborhood( inp[2], dictionary, 2)
+    tg={}
+
+    for first_word in nbd0:
+        for second_word in nbd1:
+            for third_word in nbd2:
+                trigram = first_word+' '+second_word+' '+third_word
+                tg[ trigram ]=ken5model.score(trigram, bos = True, eos = False)
+    
+    pred=max(tg, key=tg.get)
+    
+    for i in range(3,len(inp)):
+        phrases={}
+        nbd = [ inp[i] ] if inp[i] in dictionary else get_neighborhood( inp[i], dictionary, 2)
+        nbd = get_neighborhood( inp[i], dictionary, 2)
+        
+        for word in nbd:
+            candidate=pred+' '+word
+            phrases[ candidate ]=ken5model.score( candidate, bos = True, eos = False)
+            pred=max(phrases, key=phrases.get)
+    return pred        
+    
+def trigram_predict(input_sentence, dictionary): #input is a string
+    #assumes that the output of the DNN is of the right length
+    inp = input_sentence.split()
+    
+       
+    #construct the first trigram
+    #Note that the shortest sentence in this dataset has three words
+    #for the second word, use bigram prob from kenlm
+#    nbd0 = [ inp[0] ] if inp[0] in dictionary else get_neighborhood( inp[0], dictionary, 2)
+#    nbd1 = [ inp[1] ] if inp[1] in dictionary else get_neighborhood( inp[1], dictionary, 2)
+#    nbd2 = [ inp[2] ] if inp[2] in dictionary else get_neighborhood( inp[2], dictionary, 2)
+    
+    nbd0 = [ inp[0] ] if inp[0] in dictionary else get_neighborhood( inp[0], dictionary, 2)
+    nbd1 = get_neighborhood( inp[1], dictionary, 2)
+    nbd2 = get_neighborhood( inp[2], dictionary, 2)
+    tg={}
+
+    for first_word in nbd0:
+        for second_word in nbd1:
+            for third_word in nbd2:
+                trigram = first_word+' '+second_word+' '+third_word
+                tg[ trigram ]=ken5model.score(trigram, bos = True, eos = False)
+    
+    pred=max(tg, key=tg.get)
+    output = pred.split()
+    
+    for i in range(3,len(inp)):
+        phrases={}
+        nbd = [ inp[i] ] if inp[i] in dictionary else get_neighborhood( inp[i], dictionary, 2)
+#        nbd = get_neighborhood( inp[i], dictionary, 2)
+        
+        for word in nbd:
+            candidate=output[-2]+' '+output[-1]+' '+word
+#            candidate=output[-1]+' '+word
+            phrases[ word ]=ken5model.score( candidate, bos = False, eos = False)
+            next_word=max(phrases, key=phrases.get)
+        output.append( next_word )
+        pred=pred+' '+next_word
+        
+    return pred        
+
+
+            
+                
+        
+        
+        
+    
+#for key, value in sorted(bg_scores.iteritems(), key=lambda (k,v): (v,k)):
+#    print "%s: %s" % (key, value)
+#newD = dict(sorted(bg.items(), key=operator.itemgetter(1), reverse=True)[:5])
+    
+x = sorted(tg, key=tg.get, reverse=True)[:5]
 
 ## use the lines below to generate the txt on which to train kenlm
 ## the arpa file will be generated from this
