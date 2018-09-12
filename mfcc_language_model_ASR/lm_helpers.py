@@ -7,6 +7,8 @@ Created on Tue Sep 11 16:39:01 2018
 """
 import numpy as np
 from data_generator import AudioGenerator
+import re
+from itertools import chain
     
 def levenshtein(seq1, seq2):  
     # Thanks for this function to Frank Hoffman at 
@@ -35,7 +37,7 @@ def levenshtein(seq1, seq2):
                 )
 #    print (matrix)
     return (matrix[size_x - 1, size_y - 1])
-print(levenshtein('test','teams')) works!
+#print(levenshtein('test','teams')) #works!
 
 def generate_corpus(desc_file):
     #outputs a list of sentences
@@ -44,11 +46,20 @@ def generate_corpus(desc_file):
     sentences = data_sentences.train_texts
     return sentences
 
-st = generate_corpus("./train_corpus.json")
-# use the lines below to generate the txt on which to train kenlm
-# the arpa file will be generated from this
-with open('corpus_360_lines.txt', 'w') as filehandle:  
-    filehandle.writelines("%s\n" % sentence for sentence in st)    
+def wordset_from_corpus(sent_list):
+    word_list = []
+    for sent in sent_list:
+        word_list.append(sent.split())
+    long_word_list = [word for word in chain.from_iterable(word_list)]
+#    words = re.findall('\w+', long_string)
+    return set(long_word_list)
+
+#st = generate_corpus("./train_corpus.json")
+train_words = wordset_from_corpus(st)
+## use the lines below to generate the txt on which to train kenlm
+## the arpa file will be generated from this
+#with open('corpus_360_lines.txt', 'w') as filehandle:  
+#    filehandle.writelines("%s\n" % sentence for sentence in st)    
     
 #Test kenlm using the python module contributed to kenlm by Victor Chahuneau.
 # pip install https://github.com/kpu/kenlm/archive/master.zip
@@ -61,4 +72,9 @@ with open('corpus_360_lines.txt', 'w') as filehandle:
 #st_small= generate_corpus("./small_train_corpus.json")
 #with open('small_corpus_lines.txt', 'w') as filehandle:  
 #    filehandle.writelines("%s\n" % sentence for sentence in st_small)
+    
+def get_neighborhood(string, wordset, distance):
+    """Finds all words from a set of words that are within a specified Levenshtein
+    Distance from a given string"""
+    nbd = [word for word in wordset if levenshtein(string, word) <= distance ]
     
