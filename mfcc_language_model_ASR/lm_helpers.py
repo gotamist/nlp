@@ -77,4 +77,7 @@ def get_neighborhood(string, wordset, distance):
     """Finds all words from a set of words that are within a specified Levenshtein
     Distance from a given string"""
     nbd = [word for word in wordset if levenshtein(string, word) <= distance ]
+    return nbd
+    
+nbd = get_neighborhood('helium', train_words, 2)
     
