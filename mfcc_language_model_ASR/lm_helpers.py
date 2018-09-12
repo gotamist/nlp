@@ -44,12 +44,11 @@ def generate_corpus(desc_file):
     sentences = data_sentences.train_texts
     return sentences
 
-#st = generate_corpus("./train_corpus.json")
+st = generate_corpus("./train_corpus.json")
 # use the lines below to generate the txt on which to train kenlm
 # the arpa file will be generated from this
-#with open('corpus_360_lines.txt', 'w') as filehandle:  
-#    filehandle.writelines("%s\n" % sentence for sentence in st)
-    
+with open('corpus_360_lines.txt', 'w') as filehandle:  
+    filehandle.writelines("%s\n" % sentence for sentence in st)    
     
 #Test kenlm using the python module contributed to kenlm by Victor Chahuneau.
 # pip install https://github.com/kpu/kenlm/archive/master.zip
