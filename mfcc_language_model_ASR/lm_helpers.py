@@ -9,7 +9,17 @@ import numpy as np
 from data_generator import AudioGenerator
 import re
 from itertools import chain
-    
+from textblob import TextBlob as tb
+
+
+#import nltk
+#nltk.download('words')
+#nltk.download('stopwords')
+
+
+from nltk.corpus import words as nltk_words
+english=nltk_words.words()
+
 def levenshtein(seq1, seq2):  
     # Thanks for this function to Frank Hoffman at 
     # https://stackabuse.com/levenshtein-distance-and-text-similarity-in-python/
@@ -55,19 +65,13 @@ def wordset_from_corpus(sent_list):
     return set(long_word_list)
 
 #st = generate_corpus("./train_corpus.json")
-train_words = wordset_from_corpus(st)
-## use the lines below to generate the txt on which to train kenlm
-## the arpa file will be generated from this
-#with open('corpus_360_lines.txt', 'w') as filehandle:  
-#    filehandle.writelines("%s\n" % sentence for sentence in st)    
+#train_words = wordset_from_corpus(st)
+#valid_words = wordset_from_corpus(generate_corpus("./valid_corpus.json") )  
+#unseen_words =[word for word in valid_words if word not in train_words] 
+#hmmm...733 such unseen words (not many are proper nouns).  
+# Need a larger wordset than just the train_words (try nltk)
     
-#Test kenlm using the python module contributed to kenlm by Victor Chahuneau.
-# pip install https://github.com/kpu/kenlm/archive/master.zip
-# see more here https://github.com/kpu/kenlm   
-#import kenlm
-#model = kenlm.Model('corpus_360_lines.arpa')
-#
-#print(model.score('play the matter', bos = True, eos = True))
+ 
     
 #st_small= generate_corpus("./small_train_corpus.json")
 #with open('small_corpus_lines.txt', 'w') as filehandle:  
@@ -79,5 +83,21 @@ def get_neighborhood(string, wordset, distance):
     nbd = [word for word in wordset if levenshtein(string, word) <= distance ]
     return nbd
     
-nbd = get_neighborhood('helium', train_words, 2)
+#nbd = get_neighborhood('helium', train_words, 2) #tested
+nbd = get_neighborhood('helium', english, 2) #tested
+sample_input_sent = 'far ut the lake eightteen mils abo the town to ey of dis cherple can flolowor o bons had xpide ut a graft'
+inp = input_sent.split()
+
+
+## use the lines below to generate the txt on which to train kenlm
+## the arpa file will be generated from this
+#with open('corpus_360_lines.txt', 'w') as filehandle:  
+#    filehandle.writelines("%s\n" % sentence for sentence in st)    
+    
+#Test kenlm using the python module contributed to kenlm by Victor Chahuneau.
+# pip install https://github.com/kpu/kenlm/archive/master.zip
+# see more here https://github.com/kpu/kenlm   
+#import kenlm
+#model = kenlm.Model('corpus_360_lines.arpa')
+# print(model.score('play the matter', bos = True, eos = True))
     
