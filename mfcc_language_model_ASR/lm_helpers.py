@@ -37,12 +37,13 @@ def levenshtein(seq1, seq2):
     return (matrix[size_x - 1, size_y - 1])
 print(levenshtein('test','teams')) works!
 
-#def generate_corpus(desc_file):
-#    data_sentences = AudioGenerator()
-#    data_sentences.load_train_data(desc_file=desc_file)
-#    sentences = data_sentences.train_texts
-#    return sentences
-#outputs a list of sentences
+def generate_corpus(desc_file):
+    #outputs a list of sentences
+    data_sentences = AudioGenerator()
+    data_sentences.load_train_data(desc_file=desc_file)
+    sentences = data_sentences.train_texts
+    return sentences
+
 #st = generate_corpus("./train_corpus.json")
 # use the lines below to generate the txt on which to train kenlm
 # the arpa file will be generated from this
