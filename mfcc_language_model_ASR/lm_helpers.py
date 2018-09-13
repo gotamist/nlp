@@ -86,11 +86,11 @@ def get_neighborhood(string, wordset, distance):
     nbd = [word for word in wordset if levenshtein(string, word) <= distance ]
     return set( nbd )
 
-#def dolgopolsky_neighborhood(string, wordset, distance):
-#    """Finds all words from a set of words that are within a specified Levenshtein
-#    Distance from a given string"""
-#    nbd = [word for word in wordset if dst.dogol_prime_distance(string, word) <= distance ]
-#    return set( nbd )    
+def dolgopolsky_neighborhood(string, wordset, distance):
+    """Finds all words from a set of words that are within a specified Levenshtein
+    Distance from a given string"""
+    nbd = [word for word in wordset if dst.dogol_prime_distance(string, word) <= distance ]
+    return set( nbd )    
 
 #nbd = get_neighborhood('helium', train_words, 2) #tested, 5 words found
 #nbd = get_neighborhood('helium', english, 2) #tested, 43 words found
