@@ -11,6 +11,8 @@ import re
 from itertools import chain
 from textblob import TextBlob as tb
 import kenlm
+import panphon.distance
+dst = panphon.distance.Distance()
 
 
 #import nltk
@@ -82,8 +84,14 @@ def get_neighborhood(string, wordset, distance):
     """Finds all words from a set of words that are within a specified Levenshtein
     Distance from a given string"""
     nbd = [word for word in wordset if levenshtein(string, word) <= distance ]
-    return nbd
-    
+    return set( nbd )
+
+#def dolgopolsky_neighborhood(string, wordset, distance):
+#    """Finds all words from a set of words that are within a specified Levenshtein
+#    Distance from a given string"""
+#    nbd = [word for word in wordset if dst.dogol_prime_distance(string, word) <= distance ]
+#    return set( nbd )    
+
 #nbd = get_neighborhood('helium', train_words, 2) #tested, 5 words found
 #nbd = get_neighborhood('helium', english, 2) #tested, 43 words found
 sample_true = 'far up the lake eighteen miles above the town the eye of this cheerful camp follower of booms had spied out a graft'
@@ -130,7 +138,8 @@ def lm_predict(input_sentence, dictionary): #input is a string
             candidate=pred+' '+word
             phrases[ candidate ]=ken5model.score( candidate, bos = True, eos = False)
             pred=max(phrases, key=phrases.get)
-    return pred        
+    return pred    
+# 'far to the lake eighteen pins so the town to ku of dis cheaply can o fans had pile ku a graft'    
     
 def trigram_predict(input_sentence, dictionary): #input is a string
     #assumes that the output of the DNN is of the right length
@@ -173,8 +182,67 @@ def trigram_predict(input_sentence, dictionary): #input is a string
         
     return pred        
 
-
-            
+# 'far to the lake eighteen miles above the town to be of dis cheaply can can o one had side of a graft'
+def cumul_sweep(input_sentence, intermediate, dictionary):
+    inp = input_sentence.split()
+    inter=intermediate.split()
+    
+#    output=inter[:3]
+    pred=' '.join(output)
+    for i in range(3,len(inp)):
+        phrases={}
+        nbd = get_neighborhood( inter[i], dictionary, 2) 
+        nbd.union( get_neighborhood( inp[i], dictionary, 2) )   
+        for word in nbd:
+            candidate=pred+' '+word
+            phrases[ word ]=ken5model.score( candidate, bos = False, eos = False)
+            next_word=max(phrases, key=phrases.get)
+#        output.append( next_word )
+        pred=pred+' '+next_word       
+    return pred  
+    
+    
+#def trigram_dolgoposlky_predict(input_sentence, dictionary): #input is a string
+#    #assumes that the output of the DNN is of the right length
+#    inp = input_sentence.split()
+#    
+#       
+#    #construct the first trigram
+#    #Note that the shortest sentence in this dataset has three words
+#    #for the second word, use bigram prob from kenlm
+##    nbd0 = [ inp[0] ] if inp[0] in dictionary else get_neighborhood( inp[0], dictionary, 2)
+##    nbd1 = [ inp[1] ] if inp[1] in dictionary else get_neighborhood( inp[1], dictionary, 2)
+##    nbd2 = [ inp[2] ] if inp[2] in dictionary else get_neighborhood( inp[2], dictionary, 2)
+#    
+#    nbd0 = [ inp[0] ] if inp[0] in dictionary else get_neighborhood( inp[0], dictionary, 2)
+#    nbd1 = dolgoposlky_neighborhood( inp[1], dictionary, 2)
+#    nbd2 = dolgoposlky_neighborhood( inp[2], dictionary, 2)
+#    tg={}
+#
+#    for first_word in nbd0:
+#        for second_word in nbd1:
+#            for third_word in nbd2:
+#                trigram = first_word+' '+second_word+' '+third_word
+#                tg[ trigram ]=ken5model.score(trigram, bos = True, eos = False)
+#    
+#    pred=max(tg, key=tg.get)
+#    output = pred.split()
+#    
+#    for i in range(3,len(inp)):
+#        phrases={}
+#        nbd = [ inp[i] ] if inp[i] in dictionary else get_neighborhood( inp[i], dictionary, 2)
+##        nbd = get_neighborhood( inp[i], dictionary, 2)
+#        
+#        for word in nbd:
+#            candidate=output[-2]+' '+output[-1]+' '+word
+##            candidate=output[-1]+' '+word
+#            phrases[ word ]=ken5model.score( candidate, bos = False, eos = False)
+#            next_word=max(phrases, key=phrases.get)
+#        output.append( next_word )
+#        pred=pred+' '+next_word
+#        
+#    return pred     
+                
                 
         
         
@@ -184,7 +252,7 @@ def trigram_predict(input_sentence, dictionary): #input is a string
 #    print "%s: %s" % (key, value)
 #newD = dict(sorted(bg.items(), key=operator.itemgetter(1), reverse=True)[:5])
     
-x = sorted(tg, key=tg.get, reverse=True)[:5]
+#x = sorted(tg, key=tg.get, reverse=True)[:5]
 
 ## use the lines below to generate the txt on which to train kenlm
 ## the arpa file will be generated from this
