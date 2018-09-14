@@ -100,7 +100,7 @@ def dolgopolsky_neighborhood(string, wordset, distance):
 #inp = input_sent.split()
 
 #kenmodel = kenlm.Model('corpus_360_lines.arpa')
-ken5model = kenlm.Model('5_gram_corpus_360.arpa')
+#ken5model = kenlm.Model('5_gram_corpus_360.binary')
 
 
 def lm_predict(input_sentence, dictionary): #input is a string
@@ -137,11 +137,11 @@ def lm_predict(input_sentence, dictionary): #input is a string
         for word in nbd:
             candidate=pred+' '+word
             phrases[ candidate ]=ken5model.score( candidate, bos = True, eos = False)
-            pred=max(phrases, key=phrases.get)
+        pred=max(phrases, key=phrases.get)
     return pred    
 # 'far to the lake eighteen pins so the town to ku of dis cheaply can o fans had pile ku a graft'    
     
-def trigram_predict(input_sentence, train_dictionary, predict_dictionary, radius=1.5): #input is a string
+def trigram_predict(input_sentence, train_dictionary, predict_dictionary, lmodel, radius=1.5): #input is a string
     #assumes that the output of the DNN is of the right length
     inp = input_sentence.split()
     
@@ -162,7 +162,7 @@ def trigram_predict(input_sentence, train_dictionary, predict_dictionary, radius
         for second_word in nbd1:
             for third_word in nbd2:
                 trigram = first_word+' '+second_word+' '+third_word
-                tg[ trigram ]=ken5model.score(trigram, bos = True, eos = False)
+                tg[ trigram ]=lmodel.score(trigram, bos = True, eos = False)
     
     pred=max(tg, key=tg.get)
     output = pred.split()
@@ -175,8 +175,8 @@ def trigram_predict(input_sentence, train_dictionary, predict_dictionary, radius
         for word in nbd:
             candidate=output[-2]+' '+output[-1]+' '+word
 #            candidate=output[-1]+' '+word
-            phrases[ word ]=ken5model.score( candidate, bos = False, eos = False)
-            next_word=max(phrases, key=phrases.get)
+            phrases[ word ]=lmodel.score( candidate, bos = False, eos = False)
+        next_word=max(phrases, key=phrases.get)
         output.append( next_word )
         pred=pred+' '+next_word
         
@@ -195,14 +195,14 @@ def cumul_sweep(input_sentence, intermediate, dictionary):
         u_nbd=nbd.union( get_neighborhood( inp[i], dictionary, 2) )   
         for word in u_nbd:
             candidate=pred+' '+word
-            phrases[ word ]=ken5model.score( candidate, bos = False, eos = False)
-            next_word=max(phrases, key=phrases.get)
+            phrases[ word ]=lmodel.score( candidate, bos = False, eos = False)
+        next_word=max(phrases, key=phrases.get)
 #        output.append( next_word )
         pred=pred+' '+next_word       
     return pred  
     
     
-def trigram_dolgoposlky_predict(input_sentence, train_dictionary, predict_dictionary, radius=1.5): #input is a string
+def trigram_dolgoposlky_predict(input_sentence, train_dictionary, predict_dictionary, lmodel, radius=1.5): #input is a string
     #assumes that the output of the DNN is of the right length
     inp = input_sentence.split()
     
@@ -219,7 +219,7 @@ def trigram_dolgoposlky_predict(input_sentence, train_dictionary, predict_dictio
         for second_word in nbd1:
             for third_word in nbd2:
                 trigram = first_word+' '+second_word+' '+third_word
-                tg[ trigram ]=ken5model.score(trigram, bos = True, eos = False)
+                tg[ trigram ]=lmodel.score(trigram, bos = True, eos = False)
     
     pred=max(tg, key=tg.get)
     output = pred.split()
@@ -233,8 +233,8 @@ def trigram_dolgoposlky_predict(input_sentence, train_dictionary, predict_dictio
         
         for word in nbd:
             candidate=output[-2]+' '+output[-1]+' '+word
-            phrases[ word ]=ken5model.score( candidate, bos = False, eos = False)
-            next_word=max(phrases, key=phrases.get)
+            phrases[ word ]=lmodel.score( candidate, bos = False, eos = False)
+        next_word=max(phrases, key=phrases.get)
         output.append( next_word )
         pred=pred+' '+next_word        
     return pred     
@@ -243,7 +243,7 @@ def trigram_dolgoposlky_predict(input_sentence, train_dictionary, predict_dictio
 #test_dolgo=trigram_dolgoposlky_predict(sample_input_sent, train_dictionary=train_words, predict_dictionary=english, radius=1.5)  
 #print( test_dolgo )     
        
-def bigram_predict(input_sentence, train_dictionary, predict_dictionary, radius=1.5): #input is a string
+def bigram_predict(input_sentence, train_dictionary, predict_dictionary, lmodel, radius=1.5): #input is a string
     #assumes that the output of the DNN is of the right length
     inp = input_sentence.split()
     
@@ -264,7 +264,7 @@ def bigram_predict(input_sentence, train_dictionary, predict_dictionary, radius=
         for second_word in nbd1:
             for third_word in nbd2:
                 trigram = first_word+' '+second_word+' '+third_word
-                tg[ trigram ]=ken5model.score(trigram, bos = True, eos = False)
+                tg[ trigram ]=lmodel.score(trigram, bos = True, eos = False)
     
     pred=max(tg, key=tg.get)
     output = pred.split()
@@ -272,19 +272,18 @@ def bigram_predict(input_sentence, train_dictionary, predict_dictionary, radius=
     for i in range(3,len(inp)):
         phrases={}
         nbd = [ inp[i] ] if inp[i] in train_dictionary else get_neighborhood( inp[i], predict_dictionary, radius)
-#        nbd = get_neighborhood( inp[i], dictionary, 2)
         
         for word in nbd:
             candidate=output[-1]+' '+word
 #            candidate=output[-1]+' '+word
-            phrases[ word ]=ken5model.score( candidate, bos = False, eos = False)
-            next_word=max(phrases, key=phrases.get)
+            phrases[ word ]=lmodel.score( candidate, bos = False, eos = False)
+        next_word=max(phrases, key=phrases.get)
         output.append( next_word )
         pred=pred+' '+next_word
         
     return pred        
 
-def bigram_dolgoposlky_predict(input_sentence, train_dictionary, predict_dictionary, radius=1.5): #input is a string
+def bigram_dolgoposlky_predict(input_sentence, train_dictionary, predict_dictionary, lmodel, radius=1.5): #input is a string
     #assumes that the output of the DNN is of the right length
     inp = input_sentence.split()
     
@@ -301,7 +300,7 @@ def bigram_dolgoposlky_predict(input_sentence, train_dictionary, predict_diction
         for second_word in nbd1:
             for third_word in nbd2:
                 trigram = first_word+' '+second_word+' '+third_word
-                tg[ trigram ]=ken5model.score(trigram, bos = True, eos = False)
+                tg[ trigram ]=lmodel.score(trigram, bos = True, eos = False)
     
     pred=max(tg, key=tg.get)
     output = pred.split()
@@ -315,8 +314,8 @@ def bigram_dolgoposlky_predict(input_sentence, train_dictionary, predict_diction
         
         for word in nbd:
             candidate=output[-1]+' '+word
-            phrases[ word ]=ken5model.score( candidate, bos = False, eos = False)
-            next_word=max(phrases, key=phrases.get)
+            phrases[ word ]=lmodel.score( candidate, bos = False, eos = False)
+        next_word=max(phrases, key=phrases.get)
         output.append( next_word )
         pred=pred+' '+next_word        
     return pred        
