@@ -14,14 +14,6 @@ import kenlm
 import panphon.distance
 
 
-#import nltk
-#nltk.download('words')
-#nltk.download('stopwords')
-
-
-#from nltk.corpus import words as nltk_words
-#english=nltk_words.words()
-
 def levenshtein(seq1, seq2):  
     # Thanks for this function to Frank Hoffman at 
     # https://stackabuse.com/levenshtein-distance-and-text-similarity-in-python/
@@ -49,7 +41,6 @@ def levenshtein(seq1, seq2):
                 )
 #    print (matrix)
     return (matrix[size_x - 1, size_y - 1])
-#print(levenshtein('test','teams')) #works!
 
 def generate_corpus(desc_file):
     #outputs a list of sentences
@@ -72,8 +63,6 @@ def wordset_from_corpus(sent_list):
 #unseen_words =[word for word in valid_words if word not in train_words] 
 #hmmm...733 such unseen words (not many are proper nouns).  
 # Need a larger wordset than just the train_words (try nltk)
-    
- 
     
 #st_small= generate_corpus("./small_train_corpus.json")
 #with open('small_corpus_lines.txt', 'w') as filehandle:  
@@ -103,7 +92,7 @@ def dolgopolsky_neighborhood(string, wordset, distance):
 #ken5model = kenlm.Model('5_gram_corpus_360.binary')
 
 
-def lm_predict(input_sentence, dictionary): #input is a string
+def lm_predict(input_sentence, dictionary, lmodel): #input is a string
     #assumes that the output of the DNN is of the right length
     """this function keeps adding words that maximize the probability of sentence
     all the way from the beginning until the new word"""
@@ -111,11 +100,7 @@ def lm_predict(input_sentence, dictionary): #input is a string
        
     #construct the first trigram
     #Note that the shortest sentence in this dataset has three words
-    #for the second word, use bigram prob from kenlm
-#    nbd0 = [ inp[0] ] if inp[0] in dictionary else get_neighborhood( inp[0], dictionary, 2)
-#    nbd1 = [ inp[1] ] if inp[1] in dictionary else get_neighborhood( inp[1], dictionary, 2)
-#    nbd2 = [ inp[2] ] if inp[2] in dictionary else get_neighborhood( inp[2], dictionary, 2)
-    
+
     nbd0 = get_neighborhood( inp[0], dictionary, 2)
     nbd1 = get_neighborhood( inp[1], dictionary, 2)
     nbd2 = get_neighborhood( inp[2], dictionary, 2)
@@ -125,7 +110,7 @@ def lm_predict(input_sentence, dictionary): #input is a string
         for second_word in nbd1:
             for third_word in nbd2:
                 trigram = first_word+' '+second_word+' '+third_word
-                tg[ trigram ]=ken5model.score(trigram, bos = True, eos = False)
+                tg[ trigram ]=lmodel.score(trigram, bos = True, eos = False)
     
     pred=max(tg, key=tg.get)
     
@@ -136,7 +121,7 @@ def lm_predict(input_sentence, dictionary): #input is a string
         
         for word in nbd:
             candidate=pred+' '+word
-            phrases[ candidate ]=ken5model.score( candidate, bos = True, eos = False)
+            phrases[ candidate ]=lmodel.score( candidate, bos = True, eos = False)
         pred=max(phrases, key=phrases.get)
     return pred    
 # 'far to the lake eighteen pins so the town to ku of dis cheaply can o fans had pile ku a graft'    
@@ -148,10 +133,6 @@ def trigram_predict(input_sentence, train_dictionary, predict_dictionary, lmodel
        
     #construct the first trigram
     #Note that the shortest sentence in this dataset has three words
-    #for the second word, use bigram prob from kenlm
-#    nbd0 = [ inp[0] ] if inp[0] in dictionary else get_neighborhood( inp[0], dictionary, 2)
-#    nbd1 = [ inp[1] ] if inp[1] in dictionary else get_neighborhood( inp[1], dictionary, 2)
-#    nbd2 = [ inp[2] ] if inp[2] in dictionary else get_neighborhood( inp[2], dictionary, 2)
     
     nbd0 = [ inp[0] ] if inp[0] in train_dictionary else get_neighborhood( inp[0], predict_dictionary, radius)
     nbd1 = get_neighborhood( inp[1], predict_dictionary, radius)
@@ -174,7 +155,6 @@ def trigram_predict(input_sentence, train_dictionary, predict_dictionary, lmodel
         
         for word in nbd:
             candidate=output[-2]+' '+output[-1]+' '+word
-#            candidate=output[-1]+' '+word
             phrases[ word ]=lmodel.score( candidate, bos = False, eos = False)
         next_word=max(phrases, key=phrases.get)
         output.append( next_word )
@@ -187,8 +167,6 @@ def cumul_sweep(input_sentence, intermediate, dictionary):
     inp = input_sentence.split()
     inter=intermediate.split()
     
-#    output=inter[:3]
-    pred=' '.join(output)
     for i in range(3,len(inp)):
         phrases={}
         nbd = get_neighborhood( inter[i], dictionary, 2) 
@@ -197,12 +175,11 @@ def cumul_sweep(input_sentence, intermediate, dictionary):
             candidate=pred+' '+word
             phrases[ word ]=lmodel.score( candidate, bos = False, eos = False)
         next_word=max(phrases, key=phrases.get)
-#        output.append( next_word )
         pred=pred+' '+next_word       
     return pred  
     
     
-def trigram_dolgoposlky_predict(input_sentence, train_dictionary, predict_dictionary, lmodel, radius=1.5): #input is a string
+def trigram_dolgopolsky_predict(input_sentence, train_dictionary, predict_dictionary, lmodel, radius=1.5): #input is a string
     #assumes that the output of the DNN is of the right length
     inp = input_sentence.split()
     
@@ -227,10 +204,6 @@ def trigram_dolgoposlky_predict(input_sentence, train_dictionary, predict_dictio
     for i in range(3,len(inp)):
         phrases={}
         nbd = [ inp[i] ] if inp[i] in train_dictionary else dolgopolsky_neighborhood( inp[i], predict_dictionary, radius)
-#        nbd = dolgopolsky_neighborhood( inp[i], dictionary, radius)
-#        nbd_levenshtein = get_neighborhood( inp[i], dictionary, radius)
-#        ndb = nbd.union(nbd_levenshtein)
-        
         for word in nbd:
             candidate=output[-2]+' '+output[-1]+' '+word
             phrases[ word ]=lmodel.score( candidate, bos = False, eos = False)
@@ -246,14 +219,6 @@ def trigram_dolgoposlky_predict(input_sentence, train_dictionary, predict_dictio
 def bigram_predict(input_sentence, train_dictionary, predict_dictionary, lmodel, radius=1.5): #input is a string
     #assumes that the output of the DNN is of the right length
     inp = input_sentence.split()
-    
-       
-    #construct the first trigram
-    #Note that the shortest sentence in this dataset has three words
-    #for the second word, use bigram prob from kenlm
-#    nbd0 = [ inp[0] ] if inp[0] in dictionary else get_neighborhood( inp[0], dictionary, 2)
-#    nbd1 = [ inp[1] ] if inp[1] in dictionary else get_neighborhood( inp[1], dictionary, 2)
-#    nbd2 = [ inp[2] ] if inp[2] in dictionary else get_neighborhood( inp[2], dictionary, 2)
     
     nbd0 = [ inp[0] ] if inp[0] in train_dictionary else get_neighborhood( inp[0], predict_dictionary, radius)
     nbd1 = get_neighborhood( inp[1], predict_dictionary, radius)
@@ -275,7 +240,6 @@ def bigram_predict(input_sentence, train_dictionary, predict_dictionary, lmodel,
         
         for word in nbd:
             candidate=output[-1]+' '+word
-#            candidate=output[-1]+' '+word
             phrases[ word ]=lmodel.score( candidate, bos = False, eos = False)
         next_word=max(phrases, key=phrases.get)
         output.append( next_word )
@@ -283,7 +247,7 @@ def bigram_predict(input_sentence, train_dictionary, predict_dictionary, lmodel,
         
     return pred        
 
-def bigram_dolgoposlky_predict(input_sentence, train_dictionary, predict_dictionary, lmodel, radius=1.5): #input is a string
+def bigram_dolgopolsky_predict(input_sentence, train_dictionary, predict_dictionary, lmodel, radius=1.5): #input is a string
     #assumes that the output of the DNN is of the right length
     inp = input_sentence.split()
     
@@ -308,9 +272,6 @@ def bigram_dolgoposlky_predict(input_sentence, train_dictionary, predict_diction
     for i in range(3,len(inp)):
         phrases={}
         nbd = [ inp[i] ] if inp[i] in train_dictionary else dolgopolsky_neighborhood( inp[i], predict_dictionary, radius)
-#        nbd = dolgopolsky_neighborhood( inp[i], dictionary, radius)
-#        nbd_levenshtein = get_neighborhood( inp[i], dictionary, radius)
-#        ndb = nbd.union(nbd_levenshtein)
         
         for word in nbd:
             candidate=output[-1]+' '+word
