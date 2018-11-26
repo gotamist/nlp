@@ -64,9 +64,10 @@ for reguarization and batch normalization adds stability.
 
 ### The machine where the models are trained. 
 
-Finally, I'm including the details of the multi-GPU machine that I
-built. The computations were partially performed on this machine. Some
-of them were also run on a cloud (AWS).
+Finally, I'm including the details of [the multi-GPU machine that I
+built](https://github.com/gotamist/other_machine_learning/tree/master/deep-learning-machine). The
+computations were partially performed on this machine. Some of them
+were also run on a cloud (AWS).
 
 I've added an MIT license here for my work.  Respecting the Udacity
 license for the content and project, I have have added Udacity's stock
