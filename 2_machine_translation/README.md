@@ -6,7 +6,7 @@ of an end-to-end machine translation pipeline. The completed pipeline
 will accept English text as input and return the French translation.
 
 The training dataset is the `small_vocab` set of sentences in
-[StatMT](www.statmt.org), dedicated to statistical machine translation. 
+[StatMT](http://www.statmt.org), dedicated to statistical machine translation. 
 
 Sequence models are a great choice for this problem. The notebook
 contains a hierarchy of RNN models.
