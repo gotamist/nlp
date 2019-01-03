@@ -12,6 +12,17 @@ from itertools import chain
 from textblob import TextBlob as tb
 import kenlm
 import panphon.distance
+from fuzzy import DMetaphone
+
+def create_DMetaphone_list(wordset):
+    dm = DMetaphone(5)
+    codelist = []
+    codeset = set()
+    for word in wordset:
+        strings2 = [  str(code)[2:-1] for code in dm(word) if code is not None ]
+        codelist.append( strings2 )
+        codeset.update( set(strings2) )
+    return codelist, codeset
 
 
 def levenshtein(seq1, seq2):  
