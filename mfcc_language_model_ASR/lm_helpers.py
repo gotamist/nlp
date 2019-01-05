@@ -7,10 +7,10 @@ Created on Tue Sep 11 16:39:01 2018
 """
 import numpy as np
 from data_generator import AudioGenerator
-import re
+#import re
 from itertools import chain
-from textblob import TextBlob as tb
-import kenlm
+#from textblob import TextBlob as tb
+#import kenlm
 import panphon.distance
 from fuzzy import DMetaphone
 
@@ -260,19 +260,19 @@ def bigram_predict(input_sentence, train_dictionary, predict_dictionary, lmodel,
     
     nbd0 = [ inp[0] ] if inp[0] in train_dictionary else get_neighborhood( inp[0], predict_dictionary, radius)
     nbd1 = get_neighborhood( inp[1], predict_dictionary, radius)
-    nbd2 = get_neighborhood( inp[2], predict_dictionary, radius)
+#    nbd2 = get_neighborhood( inp[2], predict_dictionary, radius)
     tg={}
 
     for first_word in nbd0:
         for second_word in nbd1:
-            for third_word in nbd2:
-                trigram = first_word+' '+second_word+' '+third_word
-                tg[ trigram ]=lmodel.score(trigram, bos = True, eos = False)
+#            for third_word in nbd2:
+            bigram = first_word+' '+second_word #+' '+third_word
+            tg[ bigram ]=lmodel.score( bigram, bos = True, eos = False)
     
     pred=max(tg, key=tg.get)
     output = pred.split()
     
-    for i in range(3,len(inp)):
+    for i in range(2,len(inp)):
         phrases={}
         nbd = [ inp[i] ] if inp[i] in train_dictionary else get_neighborhood( inp[i], predict_dictionary, radius)
         
@@ -295,14 +295,14 @@ def bigram_dolgopolsky_predict(input_sentence, train_dictionary, predict_diction
     
     nbd0 = [ inp[0] ] if inp[0] in train_dictionary else dolgopolsky_neighborhood( inp[0], predict_dictionary, radius)
     nbd1 = dolgopolsky_neighborhood( inp[1], predict_dictionary, radius)
-    nbd2 = dolgopolsky_neighborhood( inp[2], predict_dictionary, radius)
+#    nbd2 = dolgopolsky_neighborhood( inp[2], predict_dictionary, radius)
     tg={}
 
     for first_word in nbd0:
         for second_word in nbd1:
-            for third_word in nbd2:
-                trigram = first_word+' '+second_word+' '+third_word
-                tg[ trigram ]=lmodel.score(trigram, bos = True, eos = False)
+#            for third_word in nbd2:
+            bigram = first_word+' '+second_word
+            tg[ bigram ]=lmodel.score(bigram, bos = True, eos = False)
     
     pred=max(tg, key=tg.get)
     output = pred.split()
