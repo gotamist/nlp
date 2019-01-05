@@ -24,6 +24,20 @@ def create_DMetaphone_list(wordset):
         codeset.update( set(strings2) )
     return codedict, codeset
 
+def code2words( code_dict, codeset ):
+    '''  create a lookup table where for every Metaphone code, you store all 
+    the words that have that code.  The inputs, code_dict and codeset, come
+    for a specific corpus and are created by create_DMetaphone_list()'''
+    c2w_dict = {}
+    for word, code_list in code_dict.items():
+        for code in code_list:
+            if code in c2w_dict.keys():
+                c2w_dict[ code ].append(word)
+            else:
+                    c2w_dict[ code ] = [word]
+                    
+    return c2w_dict 
+
 
 def levenshtein(seq1, seq2):  
     # Thanks for this function to Frank Hoffman at 
