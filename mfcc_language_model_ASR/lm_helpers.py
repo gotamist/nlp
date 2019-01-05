@@ -38,6 +38,19 @@ def code2words( code_dict, codeset ):
                     
     return c2w_dict 
 
+def sound_neighborhood( string, codeset, code2words_dict, edit_dist ):
+    '''Find a phonological neighborhood around given string from a 
+    given codeset and code2words dictionary (both of which correspond to a corpus)'''
+    dm = DMetaphone(5)
+    dm_codes = [  str(code)[2:-1] for code in dm(string) if code is not None ]
+    code_nbd = set()
+    for code in dm_codes: 
+        code_nbd.update( get_neighborhood( code, codeset, edit_dist) )
+    sound_nbd = []
+    for similar_code in code_nbd:
+        sound_nbd.extend( code2words_dict[similar_code] )
+    return sound_nbd    
+
 
 def levenshtein(seq1, seq2):  
     # Thanks for this function to Frank Hoffman at 
