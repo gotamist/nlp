@@ -38,6 +38,17 @@ def code2words( code_dict, codeset ):
                     
     return c2w_dict 
 
+def count_syllables_in_word( word ):
+    vowels = ['a','e','i','o','u']
+    count = 0
+    for i in range(len(word)):
+        if word[i] in vowels:
+            count += 1
+        if i > 2:           
+            if word[i] == 'y' and word[i-1] not in vowels:
+                   count += 1
+    return count
+
 def sound_neighborhood( string, codeset, code2words_dict, edit_dist ):
     '''Find a phonological neighborhood around given string from a 
     given codeset and code2words dictionary (both of which correspond to a corpus)'''
@@ -51,6 +62,76 @@ def sound_neighborhood( string, codeset, code2words_dict, edit_dist ):
         sound_nbd.extend( code2words_dict[similar_code] )
     return sound_nbd    
 
+
+def sound_bigram_predict(input_sentence, train_dictionary, predict_dictionary, lmodel, radius=1.5): #input is a string
+    # assumes that the output of the DNN is of the right length
+    codedict, codeset = create_DMetaphone_list(predict_dictionary)
+    code2words_dict = code2words( codedict, codeset )
+    
+    inp = input_sentence.split()
+    
+    nbd0 = [ inp[0] ] if inp[0] in train_dictionary else sound_neighborhood( inp[0], codeset, code2words_dict, radius )
+    nbd1 = sound_neighborhood( inp[1], codeset, code2words_dict, radius )
+    tg={}
+
+    for first_word in nbd0:
+        for second_word in nbd1:
+            bigram = first_word+' '+second_word #+' '+third_word
+            tg[ bigram ]=lmodel.score( bigram, bos = True, eos = False)
+    
+    pred=max(tg, key=tg.get)
+    output = pred.split()
+    
+    for i in range(2,len(inp)):
+        phrases={}
+        nbd = [ inp[i] ] if inp[i] in train_dictionary else sound_neighborhood( inp[i], codeset, code2words_dict, radius )
+        
+        for word in nbd:
+            candidate=output[-1]+' '+word
+            phrases[ word ]=lmodel.score( candidate, bos = False, eos = False)
+        next_word=max(phrases, key=phrases.get)
+        output.append( next_word )
+        pred=pred+' '+next_word
+        
+    return pred  
+
+def sound_trigram_predict(input_sentence, train_dictionary, predict_dictionary, lmodel, radius=1.5): #input is a string
+    #assumes that the output of the DNN is of the right length
+    codedict, codeset = create_DMetaphone_list(predict_dictionary)
+    code2words_dict = code2words( codedict, codeset )
+    inp = input_sentence.split()
+    
+       
+    #construct the first trigram
+    #Note that the shortest sentence in this dataset has three words
+    
+    nbd0 = [ inp[0] ] if inp[0] in train_dictionary else sound_neighborhood( inp[0], codeset, code2words_dict, radius )
+    nbd1 = sound_neighborhood( inp[1], codeset, code2words_dict, radius )
+    nbd2 = sound_neighborhood( inp[2], codeset, code2words_dict, radius )
+    tg={}
+
+    for first_word in nbd0:
+        for second_word in nbd1:
+            for third_word in nbd2:
+                trigram = first_word+' '+second_word+' '+third_word
+                tg[ trigram ]=lmodel.score(trigram, bos = True, eos = False)
+    
+    pred=max(tg, key=tg.get)
+    output = pred.split()
+    
+    for i in range(3,len(inp)):
+        phrases={}
+        nbd = [ inp[i] ] if inp[i] in train_dictionary else sound_neighborhood( inp[i], codeset, code2words_dict, radius )
+#        nbd = get_neighborhood( inp[i], dictionary, 2)
+        
+        for word in nbd:
+            candidate=output[-2]+' '+output[-1]+' '+word
+            phrases[ word ]=lmodel.score( candidate, bos = False, eos = False)
+        next_word=max(phrases, key=phrases.get)
+        output.append( next_word )
+        pred=pred+' '+next_word
+        
+    return pred  
 
 def levenshtein(seq1, seq2):  
     # Thanks for this function to Frank Hoffman at 
