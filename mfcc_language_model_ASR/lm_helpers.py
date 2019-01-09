@@ -13,6 +13,7 @@ from itertools import chain
 #import kenlm
 import panphon.distance
 from fuzzy import DMetaphone
+import pyphen
 
 def create_DMetaphone_list(wordset):
     dm = DMetaphone(5)
@@ -38,7 +39,12 @@ def code2words( code_dict, codeset ):
                     
     return c2w_dict 
 
-def count_syllables_in_word( word ):
+def num_syllables_in_word(word):
+    dic = pyphen.Pyphen(lang='en')
+    x=dic.inserted( word )
+    return x.count('-')+1
+
+def count_syllables_using_vowels( word ):
     vowels = ['a','e','i','o','u']
     count = 0
     for i in range(len(word)):
@@ -194,7 +200,7 @@ def get_neighborhood(string, wordset, distance):
     return set( nbd )
 
 def dolgopolsky_neighborhood(string, wordset, distance):
-    """Finds all words from a set of words that are within a specified Levenshtein
+    """Finds all words from a set of words that are within a specified Dolgopolsky
     Distance from a given string"""
     dst = panphon.distance.Distance()
     nbd = [word for word in wordset if dst.dogol_prime_distance(string, word) <= distance ]
