@@ -62,6 +62,16 @@ layer followed by 5 layers of birectionals GRUs followed by a
 TimeDistributed dense layer with softmax activation.  Dropout is used
 for reguarization and batch normalization adds stability.
 
+### Sentiment analysis
+
+In this folder, you'll find models to predict sentiment
+(postive/negative). Training is done on IMDB reviews.  I've shown a performance comparison of training using Gradient Boosting, a vanilla neural net and a recurrent neural net.  Please note that **none of these uses a manually constructed dictionary.**
+
+### Training word embeddings
+
+Here, you'll find an example script for training word2vec on any
+corpus.  Word2vec and GloVe are two commonly used word embeddings.
+
 ### The machine where the models are trained. 
 
 Finally, I'm including the details of [the multi-GPU machine that I
