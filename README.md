@@ -1,15 +1,44 @@
-# nlp
+# NLP
 ## Natural Language Processing
 
 The projects in this folder relate to Natural Language Processing,
 which is a beautiful area of application of machine learning that I
 find really exciting to work on.  The problems in this field are not
-new, and it has been an area of investigation by compputer scientists
+new, and it has been an area of investigation by computer scientists
 since the 1960s, but recent advances in deep neural networks have
 driven considerable advancement in the field.
 
-The projects that were done as part of the Udacity Nanodegree are
-named starting with a digit.
+The directories here contain projects covering various topic and
+problems.  If the directory contains a project that was done as part
+of the Udacity NLP Nanodegree's project requirement, that is indicated
+in within the folder.  Below is a brief overview of some of the projects.
+
+### Sentiment analysis
+
+In this folder, you'll find models to predict sentiment
+(postive/negative). Training is done on IMDB reviews.  I've shown a
+performance comparison of training using Gradient Boosting, a vanilla
+neural net and a recurrent neural net.  Please note that **none of
+these uses a manually constructed dictionary.** Dictionaries have to
+be constructed with care so that they are meaningful for the corpus at
+hand.  [Loughran and McDonald,
+2016](https://onlinelibrary.wiley.com/doi/abs/10.1111/1475-679X.12123)
+and [El-Haj et al
+2018](https://www.smurfitschool.ie/media/businessschool/profileimages/docs/generalpdfs/01%20-%20Stephen%20Young%20Conference%20Paper.pdf)
+find that many common collections of sentiment, for example are not
+suited for financial analysis.  As a simple example, "crude" is not a
+negative word in the text of a company in the energy sector.  Nor is
+there a reason to consider the words "liability" and "depreciation" to
+be negative in 10-K filings of firms - these are common words.
+
+### Training word embeddings
+
+Here, you'll find an example script for training word2vec on any
+corpus.  Word2vec and GloVe are two commonly used word embeddings.
+Word embeddings are often required for doing textual analysis in
+financial signal research.  Again word embeddings that are specific to
+a corpus (broker reports corpus or filings corpus). It is quick to
+train word2vec that is suited for a corpus and get better results.
 
 ### Part of Speech tagging
 
@@ -62,16 +91,6 @@ layer followed by 5 layers of birectionals GRUs followed by a
 TimeDistributed dense layer with softmax activation.  Dropout is used
 for reguarization and batch normalization adds stability.
 
-### Sentiment analysis
-
-In this folder, you'll find models to predict sentiment
-(postive/negative). Training is done on IMDB reviews.  I've shown a performance comparison of training using Gradient Boosting, a vanilla neural net and a recurrent neural net.  Please note that **none of these uses a manually constructed dictionary.**
-
-### Training word embeddings
-
-Here, you'll find an example script for training word2vec on any
-corpus.  Word2vec and GloVe are two commonly used word embeddings.
-
 ### The machine where the models are trained. 
 
 Finally, I'm including the details of [the multi-GPU machine that I
@@ -81,4 +100,4 @@ were also run on a cloud (AWS).
 
 I've added an MIT license here for my work.  Respecting the Udacity
 license for the content and project, I have have added Udacity's stock
-license within each project's folder.
+license within folder where appropriate.
