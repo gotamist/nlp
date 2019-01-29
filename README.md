@@ -9,9 +9,7 @@ since the 1960s, but recent advances in deep neural networks have
 driven considerable advancement in the field.
 
 The directories here contain projects covering various topic and
-problems.  If the directory contains a project that was done as part
-of the Udacity NLP Nanodegree's project requirement, that is indicated
-in within the folder.  Below is a brief overview of some of the projects.
+problems.  Below is a brief overview of some of the projects.
 
 ### Sentiment analysis
 
@@ -25,30 +23,37 @@ hand.  [Loughran and McDonald,
 2016](https://onlinelibrary.wiley.com/doi/abs/10.1111/1475-679X.12123)
 and [El-Haj et al
 2018](https://www.smurfitschool.ie/media/businessschool/profileimages/docs/generalpdfs/01%20-%20Stephen%20Young%20Conference%20Paper.pdf)
-find that many common collections of sentiment, for example are not
-suited for financial analysis.  As a simple example, "crude" is not a
-negative word in the text of a company in the energy sector.  Nor is
-there a reason to consider the words "liability" and "depreciation" to
-be negative in 10-K filings of firms - these are common words.
+contain references to studies that many common collections of
+sentiment, for example are not suited for financial analysis and how
+to construct one that is more suitable.  As a simple example, "crude"
+is not a negative word in the text of a company in the energy sector.
+Nor is there a reason to consider the words "liability" and
+"depreciation" to be negative in 10-K filings of firms - these are
+common words.
 
 ### Training word embeddings
 
 Here, you'll find an example script for training word2vec on any
 corpus.  Word2vec and GloVe are two commonly used word embeddings.
 Word embeddings are often required for doing textual analysis in
-financial signal research.  Again word embeddings that are specific to
-a corpus (broker reports corpus or filings corpus). It is quick to
-train word2vec that is suited for a corpus and get better results.
+signal research.  Again word embeddings that are specific to a corpus
+(broker reports corpus or filings corpus). [Davies and Tama-Sweet,
+2012](https://onlinelibrary.wiley.com/doi/abs/10.1111/j.1911-3846.2011.01125.x)
+and others also find systematic differences in linguistic features
+across different corpora - filings, conference calls, etc.  It is
+quick to train word2vec that is suited for a corpus if needed to get
+better results.
 
-### Part of Speech tagging
+
+### Part of Speech Tagging (POST)
 
 The problem here is to look at a sentence and for each word, identify
 the part of speech (POS) that it represents.  For example, if the
 input is
 
-"My friend ate the delicious cake quickly", the output should be
+"They refuse to permit us to obtain the new refuse permit", the output should be
 
-PRONOUN - NOUN - VERB -DETERMINANT(article)-ADJECTIVE-NOUN-ADVERB.
+PRONOUN-VERB-PREPO-VERB-PRONOUN-PREPO-VERB-DETERMINANT(article)-ADJ-NOUN-NOUN.
 
 The harder cases where disambiguation is necessary (the same word may
 play different roles in different contexts) necessitate something more
@@ -56,6 +61,9 @@ than the Most Frequent Class (MFC) tagger, although the MFC tagger is
 still useful as a baseline.  Here, a Hidden Markov Model is used and
 various regularizations are used to deal with the problem of data
 sparsity. Further details in the README in the project directory.
+
+The use of different parts of speech provides a window into complexity
+and sometimes, obfuscative intent.
 
 ### Machine translation
 
@@ -75,8 +83,7 @@ architecture is used there.  The difference is just that the encoder
 would use a CNN to produce an embedding vector to feed into the
 decoder which is a sequence model.
 
-
-### Speech recognition
+### Automatic Speech recognition
 
 The problem addressed in this project is one of taking an audio signal
 as input and producing the transcript as output. Training and testing
@@ -98,6 +105,8 @@ built](https://github.com/gotamist/other_machine_learning/tree/master/deep-learn
 computations were partially performed on this machine. Some of them
 were also run on a cloud (AWS).
 
-I've added an MIT license here for my work.  Respecting the Udacity
-license for the content and project, I have have added Udacity's stock
-license within folder where appropriate.
+I've added an MIT license here for my work.  If the directory contains
+a project that was done as part of the Udacity NLP Nanodegree's
+project requirement, that is indicated in within the
+folder. Respecting the Udacity license for the content and project, I
+have added Udacity's stock license within folder where appropriate.
